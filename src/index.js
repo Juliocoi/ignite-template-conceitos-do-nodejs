@@ -30,7 +30,7 @@ app.post('/users', (request, response) => {
   const verifyUser = users.some(user => user.username === username);
 
   if(verifyUser){
-    return response.status(400).json({Error: "This username is not avaliable."});
+    return response.status(400).json({error: "This username is not avaliable."});
   }
 
   const newUser = {
@@ -48,7 +48,7 @@ app.post('/users', (request, response) => {
 app.get('/todos', checksExistsUserAccount, (request, response) => {
   const { username }  = request;
 
-  return response.status(200).json(username.todos)
+  return response.status(200).json(username.todos);
 
 });
 
@@ -87,7 +87,7 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   todo.title = title
   todo.deadline = new Date(deadline);
   
-  return response.status(200).json(todo)
+  return response.status(200).json(todo);
 
 });
 
@@ -97,13 +97,28 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 
   const todo = username.todos.find(element => element.id === id);
 
+  if(!todo){
+    return response.status(404).json({error: "Task not found."});
+  }
+
   todo.done = true;
 
-  return response.status(200).json(todo)
+  return response.status(200).json(todo);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request;
+  const { id } = request.params;
+
+  const todo = username.todos.find(element => element.id === id);
+
+  if(!todo){
+    return response.status(404).json({error: "Task not found"});
+  }
+
+  username.todos.splice(todo, 1);
+  
+  return response.status(204).send();
 });
 
 module.exports = app;
